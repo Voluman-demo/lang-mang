@@ -1,4 +1,7 @@
-249
+// Zbiór języków oraz ich kodów zgodny ze standardem ISO 639-1, pobrany z biblioteki java.util.Locale
+
+Ilość: 249
+
 Andora  AD
 Zjednoczone Emiraty Arabskie  AE
 Afganistan  AF
