@@ -30,13 +30,13 @@ public class LangMangService {
 
     public void validateLanguageNotExists(String code) {
         if (languages.stream().anyMatch(lang -> lang.getCode().equalsIgnoreCase(code))) {
-            throw new IllegalArgumentException("Język o kodzie " + code + " już istnieje.");
+            throw new IllegalArgumentException("Jezyk o kodzie " + code + " juz istnieje.");
         }
     }
 
     public void validateLanguageExists(String code) {
         if (languages.stream().noneMatch(lang -> lang.getCode().equalsIgnoreCase(code))) {
-            throw new IllegalArgumentException("Język o kodzie " + code + " nie istnieje.");
+            throw new IllegalArgumentException("Jezyk o kodzie " + code + " nie istnieje.");
         }
     }
 

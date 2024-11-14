@@ -54,7 +54,7 @@
         try {
             const response = await fetch('http://localhost:8083/api/languages');
             if (!response.ok) {
-                throw new Error("Błąd podczas pobierania języków");
+                throw new Error("Blad podczas pobierania jezykow");
             }
             const languages = await response.json();
             displayLanguages(languages);
@@ -67,7 +67,7 @@
         hideLanguages(); // Ukryj listę języków
         const code = document.getElementById('languageCode').value.trim();
         if (!code) {
-            showMessage("Proszę wprowadzić kod języka.", 'error');
+            showMessage("Prosze wprowadzic kod jezyka.", 'error');
             return;
         }
 
@@ -94,7 +94,7 @@
         hideLanguages(); // Ukryj listę języków
         const code = document.getElementById('languageCode').value.trim();
         if (!code) {
-            showMessage("Proszę wprowadzić kod języka.", 'error');
+            showMessage("Prosze wprowadzic kod jezyka.", 'error');
             return;
         }
 
@@ -133,14 +133,14 @@
         languagesList.innerHTML = '';
 
         if (languages.length === 0) {
-            languagesList.innerHTML = '<li>Brak dostępnych języków.</li>';
+            languagesList.innerHTML = '<li>Brak dostępnych jezykow.</li>';
             return;
         }
 
         languages.forEach(lang => {
             const li = document.createElement('li');
             li.className = 'language-item';
-            li.textContent = `Kod języka: ${lang.code}`;
+            li.textContent = `Kod jezyka: ${lang.code}`;
             languagesList.appendChild(li);
         });
     }
