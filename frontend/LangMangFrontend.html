@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        input {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+        .language-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .language-item {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Zarządzanie listą języków</h2>
+<p>Wprowadź kod języka (ISO 639):</p>
+<input type="text" id="languageCode" placeholder="np. en, fr, de">
+<button onclick="addLanguage()">Dodaj język</button>
+<button onclick="removeLanguage()">Usuń język</button>
+<button onclick="clearLanguages()">Wyczyść listę</button>
+<button onclick="fetchLanguages()">Pokaż dostępne języki</button>
+
+<ul id="languages" class="language-list"></ul>
+
+<p id="message"></p>
+
+<script>
+    async function fetchLanguages() {
+        try {
+            const response = await fetch('http://localhost:8083/api/languages');
+            if (!response.ok) {
+                throw new Error("Błąd podczas pobierania języków");
+            }
+            const languages = await response.json();
+            displayLanguages(languages);
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
+    }
+
+    async function addLanguage() {
+        hideLanguages(); // Ukryj listę języków
+        const code = document.getElementById('languageCode').value.trim();
+        if (!code) {
+            showMessage("Proszę wprowadzić kod języka.", 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8083/api/languages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+
+            const message = await response.text();
+            if (!response.ok) {
+                throw new Error(message);
+            }
+
+            showMessage(message, 'success');
+        
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
+    }
+
+    async function removeLanguage() {
+        hideLanguages(); // Ukryj listę języków
+        const code = document.getElementById('languageCode').value.trim();
+        if (!code) {
+            showMessage("Proszę wprowadzić kod języka.", 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8083/api/languages/${code}`, { method: 'DELETE' });
+            const message = await response.text();
+            if (!response.ok) {
+                throw new Error(message);
+            }
+
+            showMessage(message, 'success');
+
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
+    }
+
+    async function clearLanguages() {
+        hideLanguages(); // Ukryj listę języków
+        try {
+            const response = await fetch('http://localhost:8083/api/languages/clear', { method: 'DELETE' });
+            const message = await response.text();
+            if (!response.ok) {
+                throw new Error(message);
+            }
+
+            showMessage(message, 'success');
+         
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
+    }
+
+    function displayLanguages(languages) {
+        const languagesList = document.getElementById('languages');
+        languagesList.innerHTML = '';
+
+        if (languages.length === 0) {
+            languagesList.innerHTML = '<li>Brak dostępnych języków.</li>';
+            return;
+        }
+
+        languages.forEach(lang => {
+            const li = document.createElement('li');
+            li.className = 'language-item';
+            li.textContent = `Kod języka: ${lang.code}`;
+            languagesList.appendChild(li);
+        });
+    }
+
+    function hideLanguages() {
+        document.getElementById('languages').innerHTML = '';
+    }
+
+    function showMessage(message, type) {
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = message;
+        messageElement.className = type;
+    }
+</script>
+
+</body>
+</html>
