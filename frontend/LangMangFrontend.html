@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,150 +12,267 @@
             margin: 0 auto;
             padding: 20px;
         }
+
         input {
             padding: 5px;
             margin-right: 10px;
         }
+
         button {
             padding: 5px 10px;
             margin-right: 5px;
         }
+
         .language-list {
             list-style-type: none;
             padding: 0;
         }
+
         .language-item {
             padding: 5px;
             border-bottom: 1px solid #ccc;
         }
+
         .error {
             color: red;
         }
+
         .success {
             color: green;
         }
     </style>
 </head>
+
 <body>
+    <h2>Zarządzanie listą języków</h2>
+    <p>Wprowadź kod języka (ISO 639):</p>
+    <input type="text" id="languageCode" placeholder="np. en, fr, de">
+    <br /><br />
+    <button onclick="addLanguage()">Dodaj język</button>
+    <button onclick="removeLanguage()">Usuń język</button>
+    <button onclick="clearLanguages()">Wyczyść listę</button>
+    <button onclick="fetchLanguages()">Pokaż dostępne języki</button>
+    <ul id="languages" class="language-list"></ul>
+    <p id="languageMessage"></p>
+    <br />
+    <h3>Dodaj dokument PDF</h3>
+    <form id="documentForm">
+        <input type="file" id="documentFile" accept=".pdf">
+        <br /><br />
+        <select id="documentLanguage">
+            <option value="">Wybierz język</option>
+        </select>
+        <br /><br />
+        <input type="text" id="documentType" placeholder="Typ dokumentu (np. regulamin)">
+        <br /><br />
+        <button type="button" onclick="uploadDocument()">Dodaj dokument</button>
+    </form>
+    <button onclick="checkDocuments()">Sprawdź nieaktualne dokumenty</button>
+    <p id="documentMessage"></p>
+    <ul id="documents" class="document-list"></ul>
 
-<h2>Zarządzanie listą języków</h2>
-<p>Wprowadź kod języka (ISO 639):</p>
-<input type="text" id="languageCode" placeholder="np. en, fr, de">
-<button onclick="addLanguage()">Dodaj język</button>
-<button onclick="removeLanguage()">Usuń język</button>
-<button onclick="clearLanguages()">Wyczyść listę</button>
-<button onclick="fetchLanguages()">Pokaż dostępne języki</button>
-
-<ul id="languages" class="language-list"></ul>
-
-<p id="message"></p>
-
-<script>
-    async function fetchLanguages() {
-        try {
-            const response = await fetch('http://localhost:8083/api/languages');
-            if (!response.ok) {
-                throw new Error("Blad podczas pobierania jezykow");
+    <script>
+        async function fetchLanguages() {
+            try {
+                const response = await fetch('http://localhost:8083/api/languages');
+                if (!response.ok) throw new Error("Blad podczas pobierania jezykow");
+                const languages = await response.json();
+                displayLanguages(languages);
+            } catch (error) {
+                showMessage(error.message, 'error', 'languageMessage');
             }
-            const languages = await response.json();
-            displayLanguages(languages);
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-    }
-
-    async function addLanguage() {
-        hideLanguages(); // Ukryj listę języków
-        const code = document.getElementById('languageCode').value.trim();
-        if (!code) {
-            showMessage("Prosze wprowadzic kod jezyka.", 'error');
-            return;
         }
 
-        try {
-            const response = await fetch('http://localhost:8083/api/languages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code })
+        async function addLanguage() {
+            hideLanguages();
+            const code = document.getElementById('languageCode').value.trim();
+            if (!code) {
+                showMessage("Prosze wprowadzic kod jezyka.", 'error', 'languageMessage');
+                return;
+            }
+            try {
+                const response = await fetch('http://localhost:8083/api/languages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const message = await response.text();
+                if (!response.ok) throw new Error(message);
+                showMessage(message, 'success', 'languageMessage');
+            } catch (error) {
+                showMessage(error.message, 'error', 'languageMessage');
+            }
+        }
+
+        async function removeLanguage() {
+            hideLanguages();
+            const code = document.getElementById('languageCode').value.trim();
+            if (!code) {
+                showMessage("Prosze wprowadzic kod jezyka.", 'error', 'languageMessage');
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:8083/api/languages/${code}`, { method: 'DELETE' });
+                const message = await response.text();
+                if (!response.ok) throw new Error(message);
+                showMessage(message, 'success', 'languageMessage');
+            } catch (error) {
+                showMessage(error.message, 'error', 'languageMessage');
+            }
+        }
+
+        async function clearLanguages() {
+            hideLanguages();
+            try {
+                const response = await fetch('http://localhost:8083/api/languages/clear', { method: 'DELETE' });
+                const message = await response.text();
+                if (!response.ok) throw new Error(message);
+                showMessage(message, 'success', 'languageMessage');
+            } catch (error) {
+                showMessage(error.message, 'error', 'languageMessage');
+            }
+        }
+
+        function displayLanguages(languages) {
+            const languagesList = document.getElementById('languages');
+            languagesList.innerHTML = '';
+            if (languages.length === 0) {
+                languagesList.innerHTML = '<li>Brak dostępnych jezykow.</li>';
+                return;
+            }
+            languages.forEach(lang => {
+                const li = document.createElement('li');
+                li.className = 'language-item';
+                li.textContent = `Kod jezyka: ${lang.code}`;
+                languagesList.appendChild(li);
             });
+        }
 
-            const message = await response.text();
-            if (!response.ok) {
-                throw new Error(message);
+        function hideLanguages() {
+            document.getElementById('languages').innerHTML = '';
+        }
+
+        function showMessage(message, type, elementId) {
+            const messageElement = document.getElementById(elementId);
+            messageElement.textContent = message;
+            messageElement.className = type;
+        }
+
+        document.addEventListener('DOMContentLoaded', populateLanguageSelect);
+
+        async function populateLanguageSelect() {
+            const languageSelect = document.getElementById('documentLanguage');
+            try {
+                const response = await fetch('http://localhost:8083/api/languages');
+                if (!response.ok) throw new Error("Błąd podczas pobierania listy języków.");
+                const languages = await response.json();
+                languageSelect.innerHTML = '<option value="">Wybierz język</option>';
+                languages.forEach(lang => {
+                    const option = document.createElement('option');
+                    option.value = lang.code;
+                    option.textContent = lang.code.toUpperCase();
+                    languageSelect.appendChild(option);
+                });
+            } catch (error) {
+                showMessage(error.message, 'error', 'languageMessage');
+            }
+        }
+
+        async function uploadDocument() {
+            const fileInput = document.getElementById('documentFile');
+            const languageCode = document.getElementById('documentLanguage').value;
+            const documentType = document.getElementById('documentType').value.trim();
+
+            if (!fileInput.files.length || !languageCode || !documentType) {
+                showMessage("Proszę wypełnić wszystkie pola.", 'error', 'documentMessage');
+                return;
             }
 
-            showMessage(message, 'success');
-        
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-    }
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("languageCode", languageCode);
+            formData.append("type", documentType);
 
-    async function removeLanguage() {
-        hideLanguages(); // Ukryj listę języków
-        const code = document.getElementById('languageCode').value.trim();
-        if (!code) {
-            showMessage("Prosze wprowadzic kod jezyka.", 'error');
-            return;
-        }
+            try {
+                const response = await fetch('http://localhost:8083/api/documents', {
+                    method: 'POST',
+                    body: formData
+                });
 
-        try {
-            const response = await fetch(`http://localhost:8083/api/languages/${code}`, { method: 'DELETE' });
-            const message = await response.text();
-            if (!response.ok) {
-                throw new Error(message);
+                const message = await response.text();
+                if (!response.ok) throw new Error(message);
+
+                showMessage(message, 'success', 'documentMessage');
+            } catch (error) {
+                showMessage(error.message, 'error', 'documentMessage');
             }
-
-            showMessage(message, 'success');
-
-        } catch (error) {
-            showMessage(error.message, 'error');
         }
-    }
 
-    async function clearLanguages() {
-        hideLanguages(); // Ukryj listę języków
-        try {
-            const response = await fetch('http://localhost:8083/api/languages/clear', { method: 'DELETE' });
-            const message = await response.text();
-            if (!response.ok) {
-                throw new Error(message);
+        async function checkDocuments() {
+            try {
+                const response = await fetch('http://localhost:8083/api/documents/check');
+                const outdatedDocuments = await response.json();
+                if (outdatedDocuments.length === 0) {
+                    showMessage("Wszystkie dokumenty są aktualne.", 'success', 'documentMessage');
+                } else {
+                    showMessage("Nieaktualne dokumenty:", 'error', 'documentMessage');
+                }
+                fetchDocuments();
+            } catch (error) {
+                showMessage(error.message, 'error', 'documentMessage');
+                // fetchDocuments();
             }
-
-            showMessage(message, 'success');
-         
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-    }
-
-    function displayLanguages(languages) {
-        const languagesList = document.getElementById('languages');
-        languagesList.innerHTML = '';
-
-        if (languages.length === 0) {
-            languagesList.innerHTML = '<li>Brak dostępnych jezykow.</li>';
-            return;
         }
 
-        languages.forEach(lang => {
-            const li = document.createElement('li');
-            li.className = 'language-item';
-            li.textContent = `Kod jezyka: ${lang.code}`;
-            languagesList.appendChild(li);
-        });
-    }
+        async function fetchDocuments() {
+            try {
+                const response = await fetch('http://localhost:8083/api/documents');
+                if (!response.ok) throw new Error("Błąd podczas pobierania dokumentów.");
+                const documents = await response.json();
+                console.log(documents);
+                displayDocuments(documents);
+            } catch (error) {
+                showMessage(error.message, 'error', 'documentMessage');
+            }
+        }
 
-    function hideLanguages() {
-        document.getElementById('languages').innerHTML = '';
-    }
+        function displayDocuments(documents) {
+            const documentsList = document.getElementById('documents');
+            documentsList.innerHTML = '';
+            if (documents.length === 0) {
+                documentsList.innerHTML = '<li>Brak dostępnych dokumentów.</li>';
+                return;
+            }
+            const serverUrl = 'http://localhost:8083';
 
-    function showMessage(message, type) {
-        const messageElement = document.getElementById('message');
-        messageElement.textContent = message;
-        messageElement.className = type;
-    }
-</script>
+            documents.forEach(doc => {
+                const li = document.createElement('li');
+                li.className = 'document-item';
+                console.log(doc);
 
+                const documentUrl = doc.url;
+                console.log("documnetUrl: ", doc.);
+
+                li.innerHTML = `
+                    <strong>Typ:</strong> ${doc.type}, 
+                    <strong>Język:</strong> ${doc.languageCode.toUpperCase()}, 
+                    <strong>Wersja:</strong> ${doc.version}
+                    <button onclick="viewDocument('${documentUrl}')">Otwórz</button>
+                `;
+                documentsList.appendChild(li);
+            });
+        }
+
+        function viewDocument(filename) {
+            // if (filename && filename !== 'null') {
+                const documentUrl = `${filename}`;
+                console.log(filename)
+                window.open(documentUrl, '_blank');
+            // } else {
+                // alert('Błąd: Nieprawidłowy adres URL dokumentu.');
+            // }
+        }
+    </script>
 </body>
+
 </html>
