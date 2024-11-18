@@ -1,5 +1,3 @@
-const API_BASE_URL = 'https://lang-mang.onrender.com/';
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -54,7 +52,7 @@ const API_BASE_URL = 'https://lang-mang.onrender.com/';
 <script>
     async function fetchLanguages() {
         try {
-            const response = await fetch('${API_BASE_URL}');
+            const response = await fetch('https://lang-mang.onrender.com/');
             if (!response.ok) {
                 throw new Error("Blad podczas pobierania jezykow");
             }
@@ -74,7 +72,7 @@ const API_BASE_URL = 'https://lang-mang.onrender.com/';
         }
 
         try {
-            const response = await fetch('${API_BASE_URL}', {
+            const response = await fetch('https://lang-mang.onrender.com/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code })
@@ -101,7 +99,7 @@ const API_BASE_URL = 'https://lang-mang.onrender.com/';
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/${code}`, { method: 'DELETE' });
+            const response = await fetch(`https://lang-mang.onrender.com/${code}`, { method: 'DELETE' });
             const message = await response.text();
             if (!response.ok) {
                 throw new Error(message);
@@ -117,7 +115,7 @@ const API_BASE_URL = 'https://lang-mang.onrender.com/';
     async function clearLanguages() {
         hideLanguages(); // Ukryj listę języków
         try {
-            const response = await fetch('${API_BASE_URL}/clear', { method: 'DELETE' });
+            const response = await fetch('https://lang-mang.onrender.com/clear', { method: 'DELETE' });
             const message = await response.text();
             if (!response.ok) {
                 throw new Error(message);
