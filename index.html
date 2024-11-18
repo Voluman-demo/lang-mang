@@ -52,7 +52,7 @@
 <script>
     async function fetchLanguages() {
         try {
-            const response = await fetch('http://localhost:8083/api/languages');
+            const response = await fetch('https://lang-mang.onrender.com/');
             if (!response.ok) {
                 throw new Error("Blad podczas pobierania jezykow");
             }
@@ -72,7 +72,7 @@
         }
 
         try {
-            const response = await fetch('http://localhost:8083/api/languages', {
+            const response = await fetch('https://lang-mang.onrender.com/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code })
@@ -99,7 +99,7 @@
         }
 
         try {
-            const response = await fetch(`http://localhost:8083/api/languages/${code}`, { method: 'DELETE' });
+            const response = await fetch(`https://lang-mang.onrender.com/${code}`, { method: 'DELETE' });
             const message = await response.text();
             if (!response.ok) {
                 throw new Error(message);
@@ -115,7 +115,7 @@
     async function clearLanguages() {
         hideLanguages(); // Ukryj listę języków
         try {
-            const response = await fetch('http://localhost:8083/api/languages/clear', { method: 'DELETE' });
+            const response = await fetch('https://lang-mang.onrender.com/clear', { method: 'DELETE' });
             const message = await response.text();
             if (!response.ok) {
                 throw new Error(message);
