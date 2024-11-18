@@ -1,0 +1,6 @@
+com\example\demo\LangMangApplication.class
+com\example\demo\LangMang\LangMangService.class
+com\example\demo\LangMang\Language.class
+com\example\demo\Config\SecurityConfig.class
+com\example\demo\Config\WebConfig.class
+com\example\demo\LangMang\LangMangController.class
