@@ -4,157 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Language Manager</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 21px;
-        }
-        input {
-            padding: 5px;
-            margin-right: 10px;
-        }
-        button {
-            padding: 5px 10px;
-            margin-right: 5px;
-        }
-        .language-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        .language-item {
-            padding: 5px;
-            border-bottom: 1px solid #ccc;
-        }
-        .error {
-            color: red;
-        }
-        .success {
-            color: green;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<h2>Zarządzanie listą języków</h2>
-<p>Wprowadź kod języka (ISO 639):</p>
+<h2>Zarzadzanie lista jezykow</h2>
+<p>Wprowadz kod jezyka (ISO 639):</p>
 <input type="text" id="languageCode" placeholder="np. en, fr, de">
-<button onclick="addLanguage()">Dodaj język</button>
-<button onclick="removeLanguage()">Usuń język</button>
-<button onclick="clearLanguages()">Wyczyść listę</button>
-<button onclick="fetchLanguages()">Pokaż dostępne języki</button>
-
+<br /><br />
+<button onclick="addLanguage()">Dodaj jezyk</button>
+<button onclick="removeLanguage()">Usun jezyk</button>
+<button onclick="clearLanguages()">Wyczysc liste</button>
+<button onclick="fetchLanguages()">Pokaz dostepne jezyki</button>
 <ul id="languages" class="language-list"></ul>
+<p id="languageMessage"></p>
 
-<p id="message"></p>
+<h3>Dodaj dokument PDF</h3>
+<form id="documentForm">
+    <input type="file" id="documentFile" accept=".pdf">
+    <br /><br />
+    <select id="documentLanguage">
+        <option value="">Wybierz język</option>
+    </select>
+    <br /><br />
+    <input type="text" id="documentType" placeholder="Typ dokumentu (np. regulamin)">
+    <br /><br />
+    <button type="button" onclick="uploadDocument()">Dodaj dokument</button>
+</form>
+<button onclick="checkDocuments()">Sprawdź nieaktualne dokumenty</button>
+<p id="documentMessage"></p>
+<ul id="documents" class="document-list"></ul>
 
-<script>
-    async function fetchLanguages() {
-        try {
-            const response = await fetch('https://lang-mang.onrender.com/api/languages');
-            if (!response.ok) {
-                throw new Error("Blad podczas pobierania jezykow");
-            }
-            const languages = await response.json();
-            displayLanguages(languages);
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-    }
-
-    async function addLanguage() {
-        hideLanguages(); // Ukryj listę języków
-        const code = document.getElementById('languageCode').value.trim();
-        if (!code) {
-            showMessage("Prosze wprowadzic kod jezyka.", 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch('https://lang-mang.onrender.com/api/languages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code })
-            });
-
-            const message = await response.text();
-            if (!response.ok) {
-                throw new Error(message);
-            }
-
-            showMessage(message, 'success');
-        
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-    }
-
-    async function removeLanguage() {
-        hideLanguages(); // Ukryj listę języków
-        const code = document.getElementById('languageCode').value.trim();
-        if (!code) {
-            showMessage("Prosze wprowadzic kod jezyka.", 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`https://lang-mang.onrender.com/api/languages/${code}`, { method: 'DELETE' });
-            const message = await response.text();
-            if (!response.ok) {
-                throw new Error(message);
-            }
-
-            showMessage(message, 'success');
-
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-    }
-
-    async function clearLanguages() {
-        hideLanguages(); // Ukryj listę języków
-        try {
-            const response = await fetch('https://lang-mang.onrender.com/api/languages/clear', { method: 'DELETE' });
-            const message = await response.text();
-            if (!response.ok) {
-                throw new Error(message);
-            }
-
-            showMessage(message, 'success');
-         
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-    }
-
-    function displayLanguages(languages) {
-        const languagesList = document.getElementById('languages');
-        languagesList.innerHTML = '';
-
-        if (languages.length === 0) {
-            languagesList.innerHTML = '<li>Brak dostępnych jezykow.</li>';
-            return;
-        }
-
-        languages.forEach(lang => {
-            const li = document.createElement('li');
-            li.className = 'language-item';
-            li.textContent = `Kod jezyka: ${lang.code}`;
-            languagesList.appendChild(li);
-        });
-    }
-
-    function hideLanguages() {
-        document.getElementById('languages').innerHTML = '';
-    }
-
-    function showMessage(message, type) {
-        const messageElement = document.getElementById('message');
-        messageElement.textContent = message;
-        messageElement.className = type;
-    }
-</script>
-
+<script src="scripts.js"></script>
 </body>
 </html>
