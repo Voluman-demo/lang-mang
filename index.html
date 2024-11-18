@@ -1,3 +1,5 @@
+const API_BASE_URL = 'https://lang-mang.onrender.com/';
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -52,7 +54,7 @@
 <script>
     async function fetchLanguages() {
         try {
-            const response = await fetch('http://localhost:8083/api/languages');
+            const response = await fetch('${API_BASE_URL}');
             if (!response.ok) {
                 throw new Error("Blad podczas pobierania jezykow");
             }
@@ -72,7 +74,7 @@
         }
 
         try {
-            const response = await fetch('http://localhost:8083/api/languages', {
+            const response = await fetch('${API_BASE_URL}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code })
@@ -99,7 +101,7 @@
         }
 
         try {
-            const response = await fetch(`http://localhost:8083/api/languages/${code}`, { method: 'DELETE' });
+            const response = await fetch(`${API_BASE_URL}/${code}`, { method: 'DELETE' });
             const message = await response.text();
             if (!response.ok) {
                 throw new Error(message);
@@ -115,7 +117,7 @@
     async function clearLanguages() {
         hideLanguages(); // Ukryj listę języków
         try {
-            const response = await fetch('http://localhost:8083/api/languages/clear', { method: 'DELETE' });
+            const response = await fetch('${API_BASE_URL}/clear', { method: 'DELETE' });
             const message = await response.text();
             if (!response.ok) {
                 throw new Error(message);
