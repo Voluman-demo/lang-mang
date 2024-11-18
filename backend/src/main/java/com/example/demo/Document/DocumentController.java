@@ -37,19 +37,15 @@ public class DocumentController {
                                               @RequestParam("languageCode") String languageCode,
                                               @RequestParam("type") String type) {
         try {
-            // Tworzenie katalogu, jeśli nie istnieje
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
 
-            // Tworzymy unikalną nazwę pliku
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path targetLocation = uploadDir.resolve(fileName);
 
-            // Zapisanie pliku
             file.transferTo(targetLocation);
 
-            // Tworzenie dokumentu i zapisanie go w bazie
             documentService.addDocument(languageCode, type, targetLocation.toString());
 
             return ResponseEntity.ok("Dokument został dodany.");
