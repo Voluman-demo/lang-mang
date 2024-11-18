@@ -14,5 +14,4 @@ public class Language {
         this.code = code;
     }
 
-
 }

@@ -72,9 +72,12 @@
     <ul id="documents" class="document-list"></ul>
 
     <script>
+
+        const serverUrl = 'https://lang-mang.onrender.com';
+
         async function fetchLanguages() {
             try {
-                const response = await fetch('http://localhost:8083/api/languages');
+                const response = await fetch(`${serverUrl}/api/languages`);
                 if (!response.ok) throw new Error("Blad podczas pobierania jezykow");
                 const languages = await response.json();
                 displayLanguages(languages);
@@ -91,7 +94,7 @@
                 return;
             }
             try {
-                const response = await fetch('http://localhost:8083/api/languages', {
+                const response = await fetch(`${serverUrl}/api/languages`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code })
@@ -112,7 +115,7 @@
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:8083/api/languages/${code}`, { method: 'DELETE' });
+                const response = await fetch(`${serverUrl}/api/languages/${code}`, { method: 'DELETE' });
                 const message = await response.text();
                 if (!response.ok) throw new Error(message);
                 showMessage(message, 'success', 'languageMessage');
@@ -124,7 +127,7 @@
         async function clearLanguages() {
             hideLanguages();
             try {
-                const response = await fetch('http://localhost:8083/api/languages/clear', { method: 'DELETE' });
+                const response = await fetch(`${serverUrl}/api/languages/clear`, { method: 'DELETE' });
                 const message = await response.text();
                 if (!response.ok) throw new Error(message);
                 showMessage(message, 'success', 'languageMessage');
@@ -163,7 +166,7 @@
         async function populateLanguageSelect() {
             const languageSelect = document.getElementById('documentLanguage');
             try {
-                const response = await fetch('http://localhost:8083/api/languages');
+                const response = await fetch(`${serverUrl}/api/languages`);
                 if (!response.ok) throw new Error("Błąd podczas pobierania listy języków.");
                 const languages = await response.json();
                 languageSelect.innerHTML = '<option value="">Wybierz język</option>';
@@ -194,7 +197,7 @@
             formData.append("type", documentType);
 
             try {
-                const response = await fetch('http://localhost:8083/api/documents', {
+                const response = await fetch(`${serverUrl}/api/languages`, {
                     method: 'POST',
                     body: formData
                 });
@@ -210,7 +213,7 @@
 
         async function checkDocuments() {
             try {
-                const response = await fetch('http://localhost:8083/api/documents/check');
+                const response = await fetch(`${serverUrl}/api/languages/check`);
                 const outdatedDocuments = await response.json();
                 if (outdatedDocuments.length === 0) {
                     showMessage("Wszystkie dokumenty są aktualne.", 'success', 'documentMessage');
@@ -226,7 +229,7 @@
 
         async function fetchDocuments() {
             try {
-                const response = await fetch('http://localhost:8083/api/documents');
+                const response = await fetch(`${serverUrl}/api/documents`);
                 if (!response.ok) throw new Error("Błąd podczas pobierania dokumentów.");
                 const documents = await response.json();
                 console.log(documents);
@@ -243,7 +246,6 @@
                 documentsList.innerHTML = '<li>Brak dostępnych dokumentów.</li>';
                 return;
             }
-            const serverUrl = 'http://localhost:8083';
 
             documents.forEach(doc => {
                 const li = document.createElement('li');
