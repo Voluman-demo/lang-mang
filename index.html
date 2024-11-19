@@ -23,14 +23,22 @@
     <input type="file" id="documentFile" accept=".pdf">
     <br /><br />
     <select id="documentLanguage">
-        <option value="">Wybierz język</option>
+        <option value="">Wybierz jezyk</option>
     </select>
     <br /><br />
     <input type="text" id="documentType" placeholder="Typ dokumentu (np. regulamin)">
     <br /><br />
+    <select id="versionOption">
+        <option value="EQUALIZATION">Wyrownaj wersje</option>
+        <option value="INCREASE_PATCH">Zwieksz wersje w patchu  (x.y.z+1)</option>
+        <option value="INCREASE_MINOR">Zwieksz wersje w minorze (x.y+1.z)</option>
+        <option value="INCREASE_MAJOR">Zwieksz wersje w majorze (x+1.y.z)</option>
+    </select>
+    <br /><br />
     <button type="button" onclick="uploadDocument()">Dodaj dokument</button>
 </form>
-<button onclick="checkDocuments()">Sprawdź nieaktualne dokumenty</button>
+<button onclick="fetchDocuments()">Wyswietl dokumenty</button>
+<button onclick="checkDocuments()">Sprawdz nieaktualne dokumenty</button>
 <p id="documentMessage"></p>
 <ul id="documents" class="document-list"></ul>
 

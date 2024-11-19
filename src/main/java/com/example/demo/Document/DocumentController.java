@@ -17,6 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/documents")
 public class DocumentController {
@@ -28,19 +31,43 @@ public class DocumentController {
     }
 
     @GetMapping
-    public List<Document> getAllDocuments() {
-        return documentService.getAllDocuments();
+    public Set<Document> getAllDocuments(@RequestParam(value = "type", required = false) String type) {
+        Set<Document> documents;
+        if(type != null && !type.isEmpty()) {
+            documents = documentService.getAllDocumentsByType(type);
+        } else {
+            documents = documentService.getAllDocuments();
+        }
+
+        return documents;
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<List<Document>> checkOutdatedDocuments(@RequestParam(value = "type", required = false) String type) {
+        try {
+            Set<Document> documents;
+            if(type != null && !type.isEmpty()) {
+                documents = documentService.getAllDocumentsByType(type);
+            } else {
+                documents = documentService.getAllDocuments();
+            }
+            List<Document> outdatedDocuments = documentService.getOutdatedDocuments(documents);
+            return ResponseEntity.ok(outdatedDocuments);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @PostMapping
     public ResponseEntity<String> addDocument(@RequestParam("file") MultipartFile file,
                                               @RequestParam("languageCode") String languageCode,
-                                              @RequestParam("type") String type) {
+                                              @RequestParam("type") String type,
+                                              @RequestParam("version") VersionRequest version) {
         try {
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String fileName = file.getOriginalFilename();
             InputStream fileStream = file.getInputStream();
 
-            documentService.addDocument(languageCode, type, fileName, fileStream);
+            documentService.addDocument(languageCode, type, version,fileName, fileStream);
 
             return ResponseEntity.ok("Dokument został dodany do Azure Blob Storage.");
         } catch (IOException e) {
