@@ -48,19 +48,7 @@ public class DocumentService {
 
         List<Integer> currentMaxVersion = getMaxVersionByType(type);
 
-        List<Integer> newVersion = new ArrayList<>(currentMaxVersion);
-        if (version == VersionRequest.EQUALIZATION) {
-            newVersion = currentMaxVersion;
-        } else if (version == VersionRequest.INCREASE_PATCH) {
-            newVersion.set(2, currentMaxVersion.get(2) + 1);
-        } else if (version == VersionRequest.INCREASE_MINOR) {
-            newVersion.set(1, currentMaxVersion.get(1) + 1);
-            newVersion.set(2, 1);
-        } else if (version == VersionRequest.INCREASE_MAJOR) {
-            newVersion.set(0, currentMaxVersion.get(0) + 1);
-            newVersion.set(1, 0);
-            newVersion.set(2, 1);
-        }
+        List<Integer> newVersion = getNewVersion(version, currentMaxVersion);
 
         if (isVersionDuplicate(type, newVersion, languageCode)) {
             throw new IllegalArgumentException("Dokument z tym typem i numerem wersji już istnieje.");
@@ -78,6 +66,23 @@ public class DocumentService {
 
         Document document = new Document(languageCode, type, newVersion, fileUrl);
         documents.add(document);
+    }
+
+    private List<Integer> getNewVersion(VersionRequest version, List<Integer> currentMaxVersion) {
+        List<Integer> newVersion = new ArrayList<>(currentMaxVersion);
+        if (version == VersionRequest.EQUALIZATION) {
+            newVersion = currentMaxVersion;
+        } else if (version == VersionRequest.INCREASE_PATCH) {
+            newVersion.set(2, currentMaxVersion.get(2) + 1);
+        } else if (version == VersionRequest.INCREASE_MINOR) {
+            newVersion.set(1, currentMaxVersion.get(1) + 1);
+            newVersion.set(2, 1);
+        } else if (version == VersionRequest.INCREASE_MAJOR) {
+            newVersion.set(0, currentMaxVersion.get(0) + 1);
+            newVersion.set(1, 0);
+            newVersion.set(2, 1);
+        }
+        return newVersion;
     }
 
     private boolean isVersionDuplicate(String type, List<Integer> version, String languageCode) {

@@ -1,13 +1,87 @@
 const serverUrl = 'http://localhost:8080';
 // const serverUrl = 'http://localhost:8083'
 
+
+async function RpcCallGet(method, params = {}) {
+    try {
+        const queryString = new URLSearchParams({ method, ...params }).toString();
+        const response = await fetch(`${serverUrl}/api/rpc?${queryString}`);
+        if (response.ok || response.status === 400) {
+            const contentType = response.headers.get('Content-Type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json(); 
+            } else {
+                return await response.text(); 
+            }
+        } else {
+            throw new Error(response.body);
+        }
+
+    } catch (error) {
+        throw new Error(`Blad podczas wykonywania RPC GET: ${error.message}`);
+    }
+}
+
+async function RpcCallPost(method, params = {}) {
+    try {
+        console.log(params);
+        let formData;
+        
+        
+        // Sprawdzenie, czy params to już FormData
+        if (params instanceof FormData) {
+            formData = params; // Uzywamy bezposrednio przeslanego FormData
+        } else {
+            formData = new FormData();
+            Object.keys(params).forEach(key => formData.append(key, params[key]));
+        }
+        formData.append("method", method);
+
+        for (const [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+
+        const response = await fetch(`${serverUrl}/api/rpc`, {
+            method: 'POST',
+            body: formData
+        });
+        const contentType = response.headers.get("Content-Type");
+        // if (!response.ok) throw new Error(await response.text());
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json(); 
+        } else {
+            return await response.text(); 
+        }
+    } catch (error) {
+        throw new Error(`Blad podczas wykonywania RPC POST: ${error.message}`);
+    }
+}
+
+function extractData(response){
+    const contentType = response.headers.get("Content-Type");
+            
+    if (contentType && contentType.includes("application/json")) {
+        const data = response.json();
+        console.log(data);  
+        return data;
+    } else {
+        const text = response.text();
+        console.log(text);
+        return text;  
+    }
+
+}
+
+
 // Funkcje zarzadzania jezykami
 async function fetchLanguages() {
     try {
-        const response = await fetch(`${serverUrl}/api/languages`);
-        if (!response.ok) throw new Error("Blad podczas pobierania jezykow.");
-        const languages = await response.json();
-        displayLanguages(languages);
+        hideLanguages();
+        const data = await RpcCallGet('getAllLanguages');
+        displayLanguages(data);
+        // const languages = await extractData(data);
+        // displayLanguages(languages);
+
     } catch (error) {
         showMessage(error.message, 'error', 'languageMessage');
     }
@@ -21,20 +95,21 @@ async function addLanguage() {
         return;
     }
     try {
-        const response = await fetch(`${serverUrl}/api/languages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code })
-        });
-        const message = await response.text();
-        if (!response.ok) throw new Error(message);
-        showMessage(message, 'success', 'languageMessage');
-
+        const data = await RpcCallGet('addLanguage', { code });
+        // const message = await extractData(data);
+        const message = await data;
+        if(data.status == 200){
+            showMessage(message, 'success', 'languageMessage');
+        } 
+        else{
+            showMessage(message, 'error', 'languageMessage');
+        }
         await populateLanguageSelect();
     } catch (error) {
+        console.log(error);
         showMessage(error.message, 'error', 'languageMessage');
     } finally {
-        clearInput('languageCode'); 
+        clearInput('languageCode');
     }
 }
 
@@ -46,10 +121,16 @@ async function removeLanguage() {
         return;
     }
     try {
-        const response = await fetch(`${serverUrl}/api/languages/${code}`, { method: 'DELETE' });
-        const message = await response.text();
-        if (!response.ok) throw new Error(message);
-        showMessage(message, 'success', 'languageMessage');
+        const data = await RpcCallGet('removeLanguage', { code });
+        // const message = await extractData(data);
+        const message = await data;
+        // if (!response.ok) throw new Error(message);
+        if(data.status == 200){
+            showMessage(message, 'success', 'languageMessage');
+        } 
+        else{
+            showMessage(message, 'error', 'languageMessage');
+        }
 
         await populateLanguageSelect();
     } catch (error) {
@@ -62,11 +143,16 @@ async function removeLanguage() {
 async function clearLanguages() {
     hideLanguages();
     try {
-        const response = await fetch(`${serverUrl}/api/languages/clear`, { method: 'DELETE' });
-        const message = await response.text();
-        if (!response.ok) throw new Error(message);
-        showMessage(message, 'success', 'languageMessage');
-
+        const data = await RpcCallGet('clearLanguages');
+        // if (!response.ok) throw new Error(message);
+        // const message = await extractData(data);
+        const message = await data;
+        if(data.status == 200){
+            showMessage(message, 'success', 'languageMessage');
+        } 
+        else{
+            showMessage(message, 'error', 'languageMessage');
+        }
         await populateLanguageSelect();
     } catch (error) {
         showMessage(error.message, 'error', 'languageMessage');
@@ -92,6 +178,7 @@ function displayLanguages(languages) {
 
 function hideLanguages() {
     document.getElementById('languages').innerHTML = '';
+    document.getElementById('languageMessage').innerHTML = '';
 }
 
 function clearInput(type) {
@@ -108,13 +195,13 @@ function showMessage(message, type, elementId) {
 
 document.addEventListener('DOMContentLoaded', populateLanguageSelect);
 
-// Funkcje zarzadzania dokumentami
+
 async function populateLanguageSelect() {
     const languageSelect = document.getElementById('documentLanguage');
     try {
-        const response = await fetch(`${serverUrl}/api/languages`);
-        if (!response.ok) throw new Error("Blad podczas pobierania listy jezykow.");
-        const languages = await response.json();
+        const data = await RpcCallGet('getAllLanguages');
+        // const languages = await extractData(data);
+        const languages = await data;
         languageSelect.innerHTML = '<option value="">Wybierz jezyk</option>';
         languages.forEach(lang => {
             const option = document.createElement('option');
@@ -141,25 +228,23 @@ async function uploadDocument() {
     }
 
     const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
-    formData.append("languageCode", languageCode);
-    formData.append("type", documentType);
-    formData.append("version", versionOption);
+    formData.append("documentFile", fileInput.files[0]);
+    formData.append("documentLanguage", languageCode);
+    formData.append("documentType", documentType);
+    formData.append("versionOption", versionOption);
+
+    
 
     try {
-        const response = await fetch(`${serverUrl}/api/documents`, {
-            method: 'POST',
-            body: formData
-        });
-        const message = await response.text();
-        if (!response.ok) throw new Error(message);
+        const message = await RpcCallPost('addDocument', formData);
+        // if (!response.ok) throw new Error(message);
         showMessage(message, 'success', 'documentMessage');
     } catch (error) {
         showMessage(error.message, 'error', 'documentMessage');
     } finally {
-        clearFileInput(); 
-        clearInput('documentType');
-        resetLanguageSelection();
+        // clearFileInput(); 
+        // clearInput('documentType');
+        // resetLanguageSelection();
     }
 }
 
@@ -168,12 +253,12 @@ function resetLanguageSelection() {
     const languageSelect = document.getElementById('documentLanguage');
     languageSelect.value = '';
 }
+
 async function checkDocuments() {
     try {
         const typeInput = document.getElementById('documentType').value.trim();
-        const queryParam = typeInput ? `?type=${encodeURIComponent(typeInput)}` : '';
-        const response = await fetch(`${serverUrl}/api/documents/check${queryParam}`);
-        const outdatedDocuments = await response.json();
+        const params = typeInput ? { type: typeInput } : {};
+        const outdatedDocuments = await RpcCallGet('getOutdatedDocuments', params);
         showMessage(outdatedDocuments.length === 0 ? "Wszystkie dokumenty sa aktualne." : "Nieaktualne dokumenty:", 'success', 'documentMessage');
         const documentsList = document.getElementById('documents');
         documentsList.innerHTML = '';
@@ -188,10 +273,8 @@ async function checkDocuments() {
 async function fetchDocuments() {
     try {
         const typeInput = document.getElementById('documentType').value.trim();
-        const queryParam = typeInput ? `?type=${encodeURIComponent(typeInput)}` : '';
-        const response = await fetch(`${serverUrl}/api/documents${queryParam}`);
-        if (!response.ok) throw new Error("blad podczas pobierania dokumentow.");
-        const documents = await response.json();
+        const params = typeInput ? { type: typeInput } : {};
+        const documents = await RpcCallGet('getAllDocuments', params);
         console.log(documents);
         displayDocuments(documents);
     } catch (error) {
@@ -202,7 +285,7 @@ async function fetchDocuments() {
 function displayDocuments(documents) {
     const documentsList = document.getElementById('documents');
     documentsList.innerHTML = '';
-    if (documents.length === 0) {
+    if (!Array.isArray(documents) || documents.length === 0) {
         documentsList.innerHTML = '<li>Brak dostepnych dokumentow.</li>';
         return;
     }
@@ -214,9 +297,9 @@ function displayDocuments(documents) {
         const documentUrl = doc.filePath;
         li.innerHTML = `
             <strong>Typ:</strong> ${doc.type}, 
-            <strong>Jezyk:</strong> ${doc.languageCode.toUpperCase()}, 
+            <strong>Język:</strong> ${doc.languageCode.toUpperCase()}, 
             <strong>Wersja:</strong> ${doc.version[0]}.${doc.version[1]}.${doc.version[2]}
-            <button onclick="viewDocument('${documentUrl}')">Otworz</button>
+            <button onclick="viewDocument('${documentUrl}')">Otwórz</button>
         `;
         documentsList.appendChild(li);
     });
@@ -224,7 +307,7 @@ function displayDocuments(documents) {
 
 function viewDocument(doc) {
     console.log(doc);
-    // Upewnij sie, że doc zawiera wlaściwy URL pliku
+    // Upewnij sie, ze doc zawiera wlasciwy URL pliku
     const documentUrl = doc;  // Zmieniamy na doc.filePath, bo to tam znajduje sie URL
     console.log("Otwieram dokument z URL: ", documentUrl);
 
