@@ -28,9 +28,8 @@ async function RpcCallPost(method, params = {}) {
         let formData;
         
         
-        // Sprawdzenie, czy params to już FormData
         if (params instanceof FormData) {
-            formData = params; // Uzywamy bezposrednio przeslanego FormData
+            formData = params;
         } else {
             formData = new FormData();
             Object.keys(params).forEach(key => formData.append(key, params[key]));
@@ -46,7 +45,6 @@ async function RpcCallPost(method, params = {}) {
             body: formData
         });
         const contentType = response.headers.get("Content-Type");
-        // if (!response.ok) throw new Error(await response.text());
         if (contentType && contentType.includes('application/json')) {
             return await response.json(); 
         } else {
@@ -57,30 +55,12 @@ async function RpcCallPost(method, params = {}) {
     }
 }
 
-function extractData(response){
-    const contentType = response.headers.get("Content-Type");
-            
-    if (contentType && contentType.includes("application/json")) {
-        const data = response.json();
-        console.log(data);  
-        return data;
-    } else {
-        const text = response.text();
-        console.log(text);
-        return text;  
-    }
 
-}
-
-
-// Funkcje zarzadzania jezykami
 async function fetchLanguages() {
     try {
         hideLanguages();
         const data = await RpcCallGet('getAllLanguages');
         displayLanguages(data);
-        // const languages = await extractData(data);
-        // displayLanguages(languages);
 
     } catch (error) {
         showMessage(error.message, 'error', 'languageMessage');
@@ -96,7 +76,6 @@ async function addLanguage() {
     }
     try {
         const data = await RpcCallGet('addLanguage', { code });
-        // const message = await extractData(data);
         const message = await data;
         if(data.status == 200){
             showMessage(message, 'success', 'languageMessage');
@@ -122,9 +101,7 @@ async function removeLanguage() {
     }
     try {
         const data = await RpcCallGet('removeLanguage', { code });
-        // const message = await extractData(data);
         const message = await data;
-        // if (!response.ok) throw new Error(message);
         if(data.status == 200){
             showMessage(message, 'success', 'languageMessage');
         } 
@@ -144,8 +121,6 @@ async function clearLanguages() {
     hideLanguages();
     try {
         const data = await RpcCallGet('clearLanguages');
-        // if (!response.ok) throw new Error(message);
-        // const message = await extractData(data);
         const message = await data;
         if(data.status == 200){
             showMessage(message, 'success', 'languageMessage');
@@ -200,7 +175,6 @@ async function populateLanguageSelect() {
     const languageSelect = document.getElementById('documentLanguage');
     try {
         const data = await RpcCallGet('getAllLanguages');
-        // const languages = await extractData(data);
         const languages = await data;
         languageSelect.innerHTML = '<option value="">Wybierz jezyk</option>';
         languages.forEach(lang => {
@@ -237,14 +211,13 @@ async function uploadDocument() {
 
     try {
         const message = await RpcCallPost('addDocument', formData);
-        // if (!response.ok) throw new Error(message);
         showMessage(message, 'success', 'documentMessage');
     } catch (error) {
         showMessage(error.message, 'error', 'documentMessage');
     } finally {
-        // clearFileInput(); 
-        // clearInput('documentType');
-        // resetLanguageSelection();
+        clearFileInput(); 
+        clearInput('documentType');
+        resetLanguageSelection();
     }
 }
 
@@ -297,7 +270,7 @@ function displayDocuments(documents) {
         const documentUrl = doc.filePath;
         li.innerHTML = `
             <strong>Typ:</strong> ${doc.type}, 
-            <strong>Język:</strong> ${doc.languageCode.toUpperCase()}, 
+            <strong>Jezyk:</strong> ${doc.languageCode.toUpperCase()}, 
             <strong>Wersja:</strong> ${doc.version[0]}.${doc.version[1]}.${doc.version[2]}
             <button onclick="viewDocument('${documentUrl}')">Otwórz</button>
         `;
@@ -306,12 +279,8 @@ function displayDocuments(documents) {
 }
 
 function viewDocument(doc) {
-    console.log(doc);
-    // Upewnij sie, ze doc zawiera wlasciwy URL pliku
-    const documentUrl = doc;  // Zmieniamy na doc.filePath, bo to tam znajduje sie URL
-    console.log("Otwieram dokument z URL: ", documentUrl);
+    const documentUrl = doc; 
 
-    // Otwieramy dokument w nowej karcie
     if (documentUrl && documentUrl !== 'null') {
         window.open(documentUrl, '_blank');
     } else {

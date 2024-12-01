@@ -5,11 +5,9 @@ import com.example.demo.Document.DocumentService;
 import com.example.demo.Document.VersionRequest;
 import com.example.demo.LangMang.LangMangService;
 import com.example.demo.LangMang.Language;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,8 +20,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.yaml.snakeyaml.tokens.Token.ID.Value;
 
 
 @Service
@@ -93,7 +89,7 @@ public class RpcService {
             String languageCode = params.get("documentLanguage");
             String type = params.get("documentType");
             VersionRequest version = VersionRequest.valueOf(params.get("versionOption"));
-            
+
 
             String fileName = file.getOriginalFilename();
             InputStream fileStream = file.getInputStream();
