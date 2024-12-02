@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,6 +12,6 @@ import java.util.List;
 public class Document {
     private String languageCode;
     private String type;
-    private List<Integer> version;  // x.y.z np. 1.0.2
+    private int version;
     private String filePath;
 }
