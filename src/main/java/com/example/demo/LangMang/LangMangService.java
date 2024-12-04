@@ -9,13 +9,13 @@ import java.util.Locale;
 
 @Service
 public class LangMangService {
-    private final List<Language> languages = new ArrayList<>();
+    private final List<Lang> languages = new ArrayList<>();
 
-    public List<Language> getAllLanguages() {
+    public List<Lang> getAllLanguages() {
         return languages;
     }
 
-    public void addLanguage(Language language) {
+    public void addLanguage(Lang language) {
         language.setCode(language.getCode().trim().toLowerCase());
         languages.add(language);
     }

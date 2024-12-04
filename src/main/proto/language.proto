@@ -1,0 +1,30 @@
+//syntax = "proto3";
+//
+//option java_package = "com.example.grpc";
+//option java_outer_classname = "LanguageProto";
+//
+//service LanguageService {
+//  rpc GetAllLanguages (Empty) returns (LanguageList);
+//  rpc AddLanguage (LanguageRequest) returns (Response);
+//  rpc RemoveLanguage (LanguageRequest) returns (Response);
+//  rpc ClearLanguages (Empty) returns (Response);
+//}
+//
+//message Empty {}
+//
+//message LanguageRequest {
+//  string code = 1;
+//}
+//
+//message Language {
+//  string code = 1;
+//}
+//
+//message LanguageList {
+//  repeated Language languages = 1;
+//}
+//
+//message Response {
+//  string message = 1;
+//  bool success = 2;
+//}

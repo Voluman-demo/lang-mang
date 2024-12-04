@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+option java_package = "com.example.grpc";
+option java_outer_classname = "DocumentProto";
+
+import "google/protobuf/empty.proto";
+
+message DocumentRequest {
+  string languageCode = 1;
+  string type = 2;
+  repeated int32 version = 3; // wersja w formacie x.y.z
+  string fileName = 4;
+  bytes fileContent = 5;
+}
+
+
+message DocumentAddRequest {
+  string languageCode = 1;
+  string type = 2;
+  string version = 3; // wersja w formacie x.y.z
+  string fileName = 4;
+  bytes fileContent = 5;
+}
+
+message DocumentResponse {
+  string message = 1;
+}
+
+message GetDocumentsResponse {
+  repeated Document documents = 1;
+}
+
+message DownloadFileRequest {
+  string filename = 1;
+}
+
+message DownloadFileResponse {
+  bytes fileContent = 1;
+}
+
+message CheckOutdatedDocumentsRequest {
+  string type = 1; // Typ dokumentu (opcjonalny)
+}
+
+message CheckOutdatedDocumentsResponse {
+  repeated Document outdatedDocuments = 1;
+}
+
+message Document {
+  string languageCode = 1;
+  string type = 2;
+  repeated int32 version = 3;
+  string filePath = 4;
+}
+
+service DocumentService {
+  rpc AddDocument(DocumentAddRequest) returns (DocumentResponse);
+  rpc GetAllDocuments(google.protobuf.Empty) returns (GetDocumentsResponse);
+  rpc DownloadFile(DownloadFileRequest) returns (DownloadFileResponse);
+  rpc CheckOutdatedDocuments(CheckOutdatedDocumentsRequest) returns (CheckOutdatedDocumentsResponse);
+}

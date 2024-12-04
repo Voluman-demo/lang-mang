@@ -1,0 +1,48 @@
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h2>Zarzadzanie lista jezykow</h2>
+<p>Wprowadz kod jezyka (ISO 639):</p>
+<input type="text" id="languageCode" placeholder="np. en, fr, de">
+<br /><br />
+<button onclick="addLanguage()">Dodaj jezyk</button>
+<button onclick="removeLanguage()">Usun jezyk</button>
+<button onclick="clearLanguages()">Wyczysc liste</button>
+<button onclick="fetchLanguages()">Pokaz dostepne jezyki</button>
+<ul id="languages" class="language-list"></ul>
+<p id="languageMessage"></p>
+
+<h3>Dodaj dokument PDF</h3>
+<form id="documentForm">
+    <input type="file" id="documentFile" accept=".pdf">
+    <br /><br />
+    <select id="documentLanguage">
+        <option value="">Wybierz jezyk</option>
+    </select>
+    <br /><br />
+    <input type="text" id="documentType" placeholder="Typ dokumentu (np. regulamin)">
+    <br /><br />
+    <select id="versionOption">
+        <option value="EQUALIZATION">Wyrownaj wersje</option>
+        <option value="INCREASE_PATCH">Zwieksz wersje w patchu  (x.y.z+1)</option>
+        <option value="INCREASE_MINOR">Zwieksz wersje w minorze (x.y+1.z)</option>
+        <option value="INCREASE_MAJOR">Zwieksz wersje w majorze (x+1.y.z)</option>
+    </select>
+    <br /><br />
+    <button type="button" onclick="uploadDocument()">Dodaj dokument</button>
+</form>
+<button onclick="fetchDocuments()">Wyswietl dokumenty</button>
+<button onclick="checkDocuments()">Sprawdz nieaktualne dokumenty</button>
+<p id="documentMessage"></p>
+<ul id="documents" class="document-list"></ul>
+
+<script type="text/javascript" src="scripts.js"></script>
+<!-- <script type="module" src="generated/src/main/proto/LanguageServiceClientPb.ts"></script>
+<script type="module" src="generated/src/main/proto/language_pb.js"></script> -->
+</body>
+</html>
